@@ -1,0 +1,209 @@
+<!-- Simple MDL Progress Bar -->
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+        <link href="/styles" rel="stylesheet">
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+        <div id="p1" class="mdl-progress mdl-js-progress"></div>
+    <style>
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+    <script>
+        function myFunction() {
+            let text;
+            if (confirm("Are you sure you want to delete this card?") == true){
+                text = "OK";
+            }
+            else {
+                text = "Cancel";
+            }
+            document.getElementById('hidden').value = text;
+        }
+        function myFunction1() {
+            let text;
+            if (confirm("Are you sure you want to delete this list? \n\n Note all the cards in the list will be deleted too") == true){
+                text = "OK";
+            }
+            else {
+                text = "Cancel";
+            }
+            document.getElementById('hidden1').value = text;
+        }
+    </script>
+    </head>
+    <body style="max-width: 100%; width: 200%;">
+        <div class="kanban_title" style="margin-top: 20px; margin-left: 30px;">
+        {% if plot_dict %}
+            <h4>Your Summary</h4>
+        {% else %}
+            <h4>{{name}}'s to do list</h4>
+        {% endif %}
+        </div>
+        {% if not result %}
+            <div class="Container" style="text-align: center;">
+                <h4 style="text-align: center; margin-top: 200px;">There are no list in the board</h4>
+                <form action="/addlist" method="get">
+                    <button class="button2 center" type="submit" style="margin-top: 20px;">Add list</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="dd" style="padding-left: 5%;">
+
+            <ol class="kanban To-do" style="max-width: 5500px;" type="A">
+                <div class="kanban__title">
+                <h2> To do</h2></div>
+                <div class="flexcontainer">
+                    {% set record_info = dict() %}
+                    {% for i in lst %}
+                        <div>
+                            <div class="Container" style="border: 1px solid black;">
+                                <h2 class="title dd-handle" >{{i.listname}}</h2>
+                                <ol style="padding-left: 0px;">
+                                    {% if not plot_dict %}
+                                        {% do record_info.update({i.listname:'not_present'}) %}
+                                        {% for j in lst2 %}
+                                            {% if i.list_id == j.list_id and j.deadline >= date and j.status == 'Pending' %}
+                                                {% do record_info.update({i.listname:'present'}) %}
+                                                <li class="dd-item" data-id="1">
+                                                    <a href="/{{i.listname}}/{{j.name}}"><h3 class="title dd-handle" >{{j.name}}</h3></a>
+                                                        <div class="text" contenteditable="true">{{j.description}}</div>
+                                                        <div class="text" contenteditable="true" ><p style="color: black;">{{'To be done by: '}}</p><p style="color: green;">{{j.deadline}}</p></div>
+                                                    <div class="actions">
+                                                        <button class="addbutt" onclick = "window.location.href='/addcard'">Add new card</button>
+                                                    </div>                                           
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% for key,value in record_info.items() %}
+                                            {% if value == 'not_present' and key == i.listname %}
+                                                <li class="dd-item" data-id="1">
+                                                    <h3 class="title dd-handle" >{{ 'No card available'}}</h3>
+                                                    <div class="actions">
+                                                        <button class="addbutt" onclick = "window.location.href='/addcard'">Add new card</button>
+                                                    </div>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <button class="addbutt" onclick = "window.location.href='/{{i.listname}}'">Edit</button>
+                                        <form id="delete-form" method="get" action="/delete_list/{{i.listname}}">
+                                            <input type="hidden" id="hidden1" name="delete_list">
+                                            <button class="addbutt" onclick = "myFunction1()">Delete</button>
+                                        </form>
+                                    {% else %}
+                                        {% for k,v in plot_dict.items() %}
+                                            {% if k==i.list_id and v|length > 4 %}                                         
+                                                <li class="dd-item" data-id="1">
+                                                    <p style="color: green;">Completed Tasks: {{v[2]}}/{{v[1]}}</p>
+                                                    <p style="color: darkgoldenrod;">Pending Tasks: {{v[3]}}/{{v[1]}}</p>
+                                                    <p style="color: red;">Passed deadline: {{v[4]}}/{{v[1]}}</p>
+                                                    <img width="250px" height="300px" src = "{{ url_for('static', filename = v[0]) }}" />
+                                                </li>
+                                                {% do plot_dict.update({i.list_id:'graph_done'}) %}
+                                            {% elif k==i.list_id and v| length == 4 %} 
+                                                <li class="dd-item" data-id="1">
+                                                    <p style="color: green;">Completed Tasks: {{v[1]}}/{{v[0]}}</p>
+                                                    <p style="color: darkgoldenrod;">Pending Tasks: {{v[2]}}/{{v[0]}}</p>
+                                                    <p style="color: red;">Passed deadline: {{v[3]}}/{{v[0]}}</p>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %} 
+                                    {% endif %}
+                                 </ol>                              
+                            </div>
+                        </div>
+                    {% endfor %}
+            {% if not plot_dict %}  
+                    </div>
+                    <div class="actions">
+                        <button class="addbutt" onclick="window.location.href='/addlist'">Add new list</button>
+                    </div>
+                </ol>
+                <ol class="kanban  Done" style="max-width: 1300px;">
+                    <h2>Done</h2>
+                    <div class="flexcontainer">
+                        {% set record_info = dict() %}
+                        {% for i in lst %}
+                            <div>
+                                <div class="Container" style="border: 1px solid black;">
+                                    <h2 class="title dd-handle" >{{i.listname}}</h2>
+                                    <ol style="padding-left: 0px;">
+                                            {% do record_info.update({i.listname:'not_present'}) %}
+                                            {% for j in lst2 %}
+                                                {% if i.list_id == j.list_id and j.status == 'Completed' %}
+                                                    {% do record_info.update({i.listname:'present'}) %}
+                                                    <li class="dd-item" data-id="1">
+                                                        <h3 class="title dd-handle" >{{j.name}}</h3>
+                                                            <div class="text" contenteditable="false">{{j.description}}</div>
+                                                            <div class="text" contenteditable="false" ><p style="color: green; font-size: medium;">Task Done on {{j.completed_on}}</p></div>
+                                                            <div class="actions">
+                                                                <button class="addbutt" onclick = "window.location.href='/delete/{{i.listname}}/{{j.name}}'">Delete Card</button>
+                                                            </div>                                              
+                                                        </li>                                         
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% for key,value in record_info.items() %}
+                                                {% if value == 'not_present' and key == i.listname %}
+                                                    <li class="dd-item" data-id="1">
+                                                        <h3 class="title dd-handle" >{{ 'No card available'}}</h3>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                    </ol>
+                                </div>
+                            </div>
+                        {% endfor %}
+                </ol>
+                <ol class="kanban Gone" style="max-width: 1300px;">
+                    <h2>Gone</h2>
+                    <div class="flexcontainer">
+                        {% set record_info = dict() %}
+                        {% for i in lst %}
+                            <div>
+                                <div class="Container" style="border: 1px solid black;">
+                                    <h2 class="title dd-handle" >{{i.listname}}</h2>
+                                    <ol style="padding-left: 0px;">
+                                        {% do record_info.update({i.listname:'not_present'}) %}
+                                        {% for j in lst2 %}
+                                            {% if i.list_id == j.list_id and j.status == 'Pending' and j.deadline < date %}
+                                                {% do record_info.update({i.listname:'present'}) %}
+                                                <li class="dd-item" data-id="1">
+                                                    <h3 class="title dd-handle" >{{j.name}}</h3>
+                                                        <div class="text" contenteditable="false">{{j.description}}</div>
+                                                        <div class="text" contenteditable="false" ><p style="color: red; font-size: medium;">Task Gone on {{j.deadline}}</p></div>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% for key,value in record_info.items() %}
+                                            {% if value == 'not_present' and key == i.listname %}
+                                                <li class="dd-item" data-id="1">
+                                                    <h3 class="title dd-handle" >{{ 'No card available'}}</h3>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </ol>
+                    </div>
+            {% endif %}
+        {% endif %}
+        {% if plot_dict %}
+                </div>
+            </ol>
+            </div>
+            <menu class="kanban">
+                <button onclick="window.location.href='/summary'"><i class="material-icons">summary</i></button>
+                <button onclick="window.location.href='/logout'"><i class="material-icons">logout</i></button>
+            </menu>
+        {% else %} 
+        <menu class="kanban">
+            <button onclick="window.location.href='/summary'"><i class="material-icons">summary</i></button>
+            <button onclick="window.location.href='/logout'"><i class="material-icons">logout</i></button>
+        </menu>
+        {% endif %}
+    </body>
+</html>

@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>Simple Kanban Board </title>
+        <!-- CSS only -->
+        <link rel="icon" href="data:,">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+        <style>
+            body {
+                border: 1px;
+                margin-top: 30px;
+                margin-bottom: 30px;
+                border-style: solid;
+            }
+            .button {
+                margin-top: 5%;
+                width: 12em;
+                height: 4em;
+                background-color: #008CBA;
+                color: white;
+                text-align: center;
+                border-radius: 10px;
+                border-color: #008CBA;
+            }
+        </style>
+    </head>
+    <body class="Container">
+        <div class="Container" style="margin-top: 20px; margin-left: 30px;">
+            <h4>Hello {{ name }}</h4>
+        </div>
+        <div class="'Container" style="text-align: center; font-size: larger; font-weight: 700; margin-top: 20px; margin-bottom: 5%;">
+            Edit list
+        </div>
+        <div class="col" style="text-align: center;">
+            <form id="userform" action="/{{listname}}" method="post">
+                <label for="name" style="margin-right: 20px;">Name:   </label>
+                <input id="name" name="name" form="userform" value="{{listname}}" style=" vertical-align: middle; text-align: center; width: 25%; height: 10%;" required><br>
+                <label style="margin-right: 20px; text-align: center; vertical-align: middle;" for="description">Description:   </label>
+                <textarea id="description" form="userform" rows="4" cols="50" name="description" form="userform" style="margin-top: 5%; margin-right: 40px;  vertical-align: middle; text-align: center;">{{description}}</textarea><br>
+                <button class="button" type="submit" value="submit">submit</button>
+            </form>
+        </div>
+    </body>
